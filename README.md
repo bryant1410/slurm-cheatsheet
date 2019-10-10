@@ -18,3 +18,7 @@ Nodes GPU usage:
 ```bash
 squeue -t RUNNING --partition gpu --noheader -o "%N:%b" | awk -F : '{ seen[$1] += $3 } END { for (i in seen) print i ":" seen[i] }' | sort
 ```
+
+```bash
+echo 'NODELIST CPUS(A/I/O/T) CPU_LOAD FREE_MEM MEMORY ALLOC_GPUS' && join -a 1 <(sinfo --partition gpu -N --states=alloc,idle,mix --noheader -o "%8N %13C %8O %8e %6m") <(squeue -t RUNNING --partition gpu --noheader -o "%N:%b" | awk -F : '{ m = gensub(/^(.*)\[(.+)-(.+)\](.*)$/, "\\1-\\2-\\3", 1, $1); if(m ~ /-/) { split(m, ms, "-"); for (i = int(ms[2]); i <= int(ms[3]); i++) { print ms[1] i " " $3 } } else { print $1 " " $3 } }'| awk '{ seen[$1] += $2 } END { for (i in seen) print i " " seen[i] }' | sort)
+```
