@@ -3,7 +3,7 @@
 | Action                   | Command                                                                                                             |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Show GPU partition queue | `squeue -i 30 --partition gpu -o "%.18i %.9P %.40j %.8u %.8a %.8T %.6D %.4C %.5D %.6m %.13b %.10M %.10l %.28R"` |
-| Account billing | `sreport -T billing cluster AccountUtilizationByUser start=mm/dd/yy end=mm/dd/yy account=test \| sed -r 's/(.*billing\s+)([0-9]+)\b(.*)/echo "\1    \\$$((\2\/100000))\3"/ge'` |
+| Account billing | `sreport -T billing cluster AccountUtilizationByUser start=mm/dd/yy end=mm/dd/yy account=test \| sed -r 's/(.*billing\s+)([0-9]+)\b(.*)/echo "\1 \\$$(echo scale=2\\; \2\/100000 | bc)\3"/ge'` |
 | Account GPU-hours utilization | `sreport -t hours -T gres/gpu cluster AccountUtilizationByUser start=mm/dd/yy end=mm/dd/yy account=test` |
 | Time until next walltime | ? |
 
