@@ -1,10 +1,19 @@
 # Slurm Cheat Sheet
 
-## Show GPU partition queue
+## Watch the GPU partition queue
 
 ```bash
 squeue \
   -i 30 \
+  --partition gpu \
+  -o "%.18i %.9P %.40j %.8u %.8a %.8T %.6D %.4C %.5D %.6m %.13b %.10M %.10l %.28R"
+```
+
+## Show the GPU partition queue for an account
+
+```bash
+squeue \
+  -A test \
   --partition gpu \
   -o "%.18i %.9P %.40j %.8u %.8a %.8T %.6D %.4C %.5D %.6m %.13b %.10M %.10l %.28R"
 ```
