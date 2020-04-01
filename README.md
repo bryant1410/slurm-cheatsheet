@@ -93,7 +93,7 @@ import fileinput
 import subprocess
 from collections import defaultdict
 
-# https://github.com/NERSC/pytokio/blob/fdb82374c0000d00364dd9c8f43f20a8db4b1a9d/tokio/connectors/slurm.py#L81
+# From https://github.com/NERSC/pytokio/blob/fdb8237/tokio/connectors/slurm.py#L81
 def node_spec_to_list(node_spec):
   return subprocess.check_output(['scontrol', 'show', 'hostname', node_spec]).decode().strip().split()
 
