@@ -69,7 +69,7 @@ echo Allocated GPUs: \
   )
 ```
 
-## GPU nodes resource utilization
+## GPU node resource utilization
 
 ```bash
 join \
@@ -87,33 +87,40 @@ join \
     -t RUNNING \
     --partition gpu \
     --noheader \
-    -o "%N:%b" \
-  | awk \
-    -F : \
-    '{
-      m = gensub(/^(.*)\[(([[:digit:]]+),)?([[:digit:]]+)-([[:digit:]]+)\].*$/,
-                 "\\1-\\2-\\3-\\4-\\5", 1, $1);
-      if(m ~ /-/) {
-        split(m, ms, "-");
-        for (i = int(ms[4]); i <= int(ms[5]); i++) {
-          print ms[1] i " " $3
-        };
-        if(ms[3]) {
-          print ms[1] ms[3] " " $3
-        }
-      } else {
-        print $1 " " $3
-      }
-    }' \
-  | awk '{ seen[$1] += $2 } END { for (i in seen) print i " " seen[i] }' \
-  | sort \
-  ) \
+    -o "%N %b %u %a" \
+  | python3 -c "
+import fileinput
+import subprocess
+from collections import defaultdict
+
+# From https://github.com/NERSC/pytokio/blob/fdb82374c0000d00364dd9c8f43f20a8db4b1a9d/tokio/connectors/slurm.py#L81
+def node_spec_to_list(node_spec):
+  return subprocess.check_output(['scontrol', 'show', 'hostname', node_spec]).decode().strip().split()
+
+nodes_info = defaultdict(lambda: {'gpus': 0, 'users': []})
+
+for line in fileinput.input():
+  line = line.strip()
+
+  node_spec, gres, u, a = line.split()
+  nodes = node_spec_to_list(node_spec)
+  gpus = gres.split(':')[1]
+
+  for node in nodes:
+    node_info = nodes_info[node]
+    node_info['gpus'] += int(gpus)
+    node_info['users'].extend(f'{u}({a})' for _ in gpus)
+
+for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
+  print(f\"{node} {node_info['gpus']} {','.join(node_info['users'])}\")
+  ") \
+| sed -e 's/ 0 0/ 0 /' \
 | awk \
   'BEGIN{
-    printf("%6s %10s %9s %10s\n", "NODE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS")
+    printf("%6s %10s %9s %10s %s\n", "NODE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
   };
   {
     split($2, cpu, "/");
-    printf("%6s %7d/%2d %5.0f/%s %10s\n", $1, cpu[1], cpu[4], ($4 - $3)/1024, $4/1024, $5 "/2")
+    printf("%6s %7d/%2d %5.0f/%s %10s %s\n", $1, cpu[1], cpu[4], ($4 - $3)/1024, $4/1024, $5 "/2", $6)
   }'
 ```
