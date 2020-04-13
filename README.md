@@ -103,13 +103,14 @@ for line in fileinput.input():
   line = line.strip()
 
   node_spec, gres, u, a = line.split()
-  nodes = node_spec_to_list(node_spec)
-  gpus = gres.split(':')[-1]
+  if gres.startswith('gpu:'):
+    nodes = node_spec_to_list(node_spec)
+    gpus = gres.split(':')[-1]
 
-  for node in nodes:
-    node_info = nodes_info[node]
-    node_info['gpus'] += int(gpus)
-    node_info['users'].extend(f'{u}({a})' for _ in gpus)
+    for node in nodes:
+      node_info = nodes_info[node]
+      node_info['gpus'] += int(gpus)
+      node_info['users'].extend(f'{u}({a})' for _ in gpus)
 
 for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
   print(f\"{node} {node_info['gpus']} {','.join(node_info['users'])}\")
