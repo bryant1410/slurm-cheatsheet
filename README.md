@@ -104,7 +104,7 @@ for line in fileinput.input():
 
   node_spec, gres, u, a = line.split()
   nodes = node_spec_to_list(node_spec)
-  gpus = gres.split(':')[-1] if gres.startswith('gpu:') else 0
+  gpus = gres.split(':')[-1] if gres.startswith('gpu:') else "0"
 
   for node in nodes:
     node_info = nodes_info[node]
