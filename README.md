@@ -81,7 +81,7 @@ join \
     -N \
     --states=alloc,idle,mix \
     --noheader \
-    -o "%8N %13C %8e %6m %10G"
+    -O nodelist:7,cpusstate:12,allocmem:7,memory:7,gres:10
   ) \
   <(squeue \
     -t RUNNING \
@@ -141,7 +141,7 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
     cpus = cpu[4];
     total_cpus += cpus;
 
-    mem_alloc = ($4 - $3) / 1024;
+    mem_alloc = $3 / 1024;
     total_mem_alloc += mem_alloc;
 
     mem = $4 / 1024;
