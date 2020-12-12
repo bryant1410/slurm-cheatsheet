@@ -120,11 +120,44 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
 | sed -e 's/ 0 0/ 0 /' \
 | awk \
   'BEGIN{
+    total_cpus_alloc = 0;
+    total_cpus = 0;
+    total_mem_alloc = 0;
+    total_mem = 0;
+    total_gpus_alloc = 0;
+    total_gpus = 0;
+
     printf("%6s %10s %9s %10s %s\n", "NODE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
   };
   {
     split($2, cpu, "/");
     split($5, gres, ":");
-    printf("%6s %7d/%2d %5.0f/%s %10s %s\n", $1, cpu[1], cpu[4], ($4 - $3)/1024, $4/1024, $6 "/" gres[3], $7)
+
+    node = $1;
+
+    cpus_alloc = cpu[1];
+    total_cpus_alloc += cpus_alloc;
+
+    cpus = cpu[4];
+    total_cpus += cpus;
+
+    mem_alloc = ($4 - $3) / 1024;
+    total_mem_alloc += mem_alloc;
+
+    mem = $4 / 1024;
+    total_mem += mem;
+
+    gpus_alloc = $6;
+    total_gpus_alloc += gpus_alloc;
+
+    gpus = gres[3];
+    total_gpus += gpus;
+
+    users = $7;
+
+    printf("%6s %6d/%3d %4d/%4d %7d/%2d %s\n", node, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
+  };
+  END{
+    printf("%6s %6d/%3d %4d/%4d %7d/%2d\n", "TOTAL", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
   }'
 ```
