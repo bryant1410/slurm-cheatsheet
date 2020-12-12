@@ -78,10 +78,9 @@ join \
   -o auto \
   <(sinfo \
     --partition gpu \
-    -N \
-    --states=alloc,idle,mix \
+    --Node \
     --noheader \
-    -O nodelist:7,cpusstate:12,allocmem:7,memory:7,gres:10
+    -O NodeList:7,CPUsState:12,AllocMem:7,Memory:7,Gres:11,StateCompact:.4
   ) \
   <(squeue \
     -t RUNNING \
@@ -127,13 +126,15 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
     total_gpus_alloc = 0;
     total_gpus = 0;
 
-    printf("%6s %10s %9s %10s %s\n", "NODE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
+    printf("%6s %5s %10s %9s %10s %s\n", "NODE", "STATE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
   };
   {
     split($2, cpu, "/");
     split($5, gres, ":");
 
     node = $1;
+
+    state = $6;
 
     cpus_alloc = cpu[1];
     total_cpus_alloc += cpus_alloc;
@@ -147,17 +148,17 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
     mem = $4 / 1024;
     total_mem += mem;
 
-    gpus_alloc = $6;
+    gpus_alloc = $7;
     total_gpus_alloc += gpus_alloc;
 
     gpus = gres[3];
     total_gpus += gpus;
 
-    users = $7;
+    users = $8;
 
-    printf("%6s %6d/%3d %4d/%4d %7d/%2d %s\n", node, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
+    printf("%6s %5s %6d/%3d %4d/%4d %7d/%2d %s\n", node, state, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
   };
   END{
-    printf("%6s %6d/%3d %4d/%4d %7d/%2d\n", "TOTAL", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
+    printf("%6s %5s %6d/%3d %4d/%4d %7d/%2d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
   }'
 ```
