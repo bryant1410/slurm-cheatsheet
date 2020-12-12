@@ -81,7 +81,7 @@ join \
     -N \
     --states=alloc,idle,mix \
     --noheader \
-    -o "%8N %13C %8e %6m"
+    -o "%8N %13C %8e %6m %10G"
   ) \
   <(squeue \
     -t RUNNING \
@@ -124,6 +124,7 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
   };
   {
     split($2, cpu, "/");
-    printf("%6s %7d/%2d %5.0f/%s %10s %s\n", $1, cpu[1], cpu[4], ($4 - $3)/1024, $4/1024, $5 "/2", $6)
+    split($5, gres, ":");
+    printf("%6s %7d/%2d %5.0f/%s %10s %s\n", $1, cpu[1], cpu[4], ($4 - $3)/1024, $4/1024, $6 "/" gres[3], $7)
   }'
 ```
