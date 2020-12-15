@@ -87,7 +87,7 @@ join \
     --partition gpu \
     --noheader \
     -o "%N %b %u %a" \
-  | python3 -c "
+  | python -c "
 import fileinput
 import subprocess
 from collections import defaultdict
@@ -111,10 +111,10 @@ for line in fileinput.input():
       node_info['gpus'] += int(gpus)
     except ValueError:
       pass
-    node_info['users'].extend(f'{u}({a})' for _ in gpus)
+    node_info['users'].extend('{}({})'.format(u, a) for _ in gpus)
 
 for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
-  print(f\"{node} {node_info['gpus']} {','.join(node_info['users'])}\")
+  print(\"{} {} {}\".format(node, node_info['gpus'], ','.join(node_info['users'])))
   ") \
 | sed -e 's/ 0 0/ 0 /' \
 | awk \
