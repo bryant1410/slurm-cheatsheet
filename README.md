@@ -74,19 +74,18 @@ echo Allocated GPUs: \
 ```bash
 join \
   -a 1 \
-  -e 0 \
   -o auto \
   <(sinfo \
     --partition gpu \
     --Node \
     --noheader \
-    -O NodeList:7,CPUsState:12,AllocMem:7,Memory:7,Gres:11,StateCompact:.4
+    -O NodeList:7,CPUsState:12,AllocMem:7,Memory:7,Gres:11,StateCompact:6,GresUsed:.10
   ) \
   <(squeue \
     -t RUNNING \
     --partition gpu \
     --noheader \
-    -o "%N %b %u %a" \
+    -o "%N %u %a" \
   | python -c "
 import fileinput
 import subprocess
@@ -96,27 +95,19 @@ from collections import defaultdict
 def node_spec_to_list(node_spec):
   return subprocess.check_output(['scontrol', 'show', 'hostname', node_spec]).decode().strip().split()
 
-nodes_info = defaultdict(lambda: {'gpus': 0, 'users': []})
+users_by_node = defaultdict(list)
 
 for line in fileinput.input():
   line = line.strip()
 
-  node_spec, gres, u, a = line.split()
-  nodes = node_spec_to_list(node_spec)
-  gpus = gres.split(':')[-1] if gres.startswith('gpu:') else '0'
+  node_spec, u, a = line.split()
+  
+  for node in node_spec_to_list(node_spec):
+    users_by_node[node].append('{}({})'.format(u, a))
 
-  for node in nodes:
-    node_info = nodes_info[node]
-    try:
-      node_info['gpus'] += int(gpus)
-    except ValueError:
-      pass
-    node_info['users'].extend('{}({})'.format(u, a) for _ in gpus)
-
-for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
-  print(\"{} {} {}\".format(node, node_info['gpus'], ','.join(node_info['users'])))
+for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
+  print('{} {}'.format(node, ','.join(node_info)))
   ") \
-| sed -e 's/ 0 0/ 0 /' \
 | awk \
   'BEGIN{
     total_cpus_alloc = 0;
@@ -131,6 +122,7 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
   {
     split($2, cpu, "/");
     split($5, gres, ":");
+    split($7, gres_used, ":");
 
     node = $1;
 
@@ -148,7 +140,7 @@ for node, node_info in sorted(nodes_info.items(), key=lambda t: t[0]):
     mem = $4 / 1024;
     total_mem += mem;
 
-    gpus_alloc = $7;
+    gpus_alloc = gres_used[3];
     total_gpus_alloc += gpus_alloc;
 
     gpus = gres[3];
