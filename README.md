@@ -153,4 +153,10 @@ for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
   END{
     printf("%6s %5s %6d/%3d %4d/%4d %7d/%2d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
   }'
+pending_jobs=$(squeue --partition gpu -t PENDING --noheader)
+if [ ! -z "$pending_jobs" ]; then
+  echo
+  echo Pending jobs:
+  echo "$pending_jobs"
+fi
 ```
