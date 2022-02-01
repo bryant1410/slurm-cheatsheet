@@ -112,7 +112,7 @@ for line in fileinput.input():
     users_by_node[node].append('{}({})'.format(u, a))
 
 for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
-    print('{} {}'.format(node, ','.join(node_info)))
+  print('{} {}'.format(node, ','.join(node_info)))
     ") \
   | awk \
     'BEGIN{
