@@ -85,7 +85,7 @@ gpu_usage() {
       --partition $1 \
       --Node \
       --noheader \
-      -O NodeList:7,CPUsState:12,AllocMem:7,Memory:7,Gres:11,StateCompact:6,GresUsed:.10
+      -O NodeList,CPUsState,AllocMem,Memory,Gres,StateCompact,GresUsed
     ) \
     <(squeue \
       -t RUNNING \
@@ -123,12 +123,12 @@ for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
       total_gpus_alloc = 0;
       total_gpus = 0;
 
-      printf("%6s %5s %10s %9s %10s %s\n", "NODE", "STATE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
+      printf("%6s %5s %11s %11s %11s %s\n", "NODE", "STATE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
     };
     {
       split($2, cpu, "/");
       split($5, gres, ":");
-      split($7, gres_used, ":");
+      split($7, gres_used, ":|\\(");
 
       node = $1;
 
@@ -154,10 +154,10 @@ for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
 
       users = $8;
 
-      printf("%6s %5s %6d/%3d %4d/%4d %7d/%2d %s\n", node, state, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
+      printf("%6s %5s %6d/%4d %5d/%5d %7d/%3d %s\n", node, state, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
     };
     END{
-      printf("%6s %5s %6d/%3d %4d/%4d %7d/%2d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
+      printf("%6s %5s %6d/%4d %5d/%5d %7d/%3d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
     }'
   pending_jobs=$(squeue --partition $1 -t PENDING --noheader)
   if [ ! -z "$pending_jobs" ]; then
