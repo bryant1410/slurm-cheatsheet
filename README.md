@@ -123,7 +123,7 @@ for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
       total_gpus_alloc = 0;
       total_gpus = 0;
 
-      printf("%6s %5s %11s %11s %11s %s\n", "NODE", "STATE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
+      printf("%6s %6s %11s %11s %11s %s\n", "NODE", "STATE", "ALLOC_CPUS", "ALLOC_MEM", "ALLOC_GPUS", "USERS")
     };
     {
       split($2, cpu, "/");
