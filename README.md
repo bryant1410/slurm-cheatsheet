@@ -154,10 +154,10 @@ for node, node_info in sorted(users_by_node.items(), key=lambda t: t[0]):
 
       users = $8;
 
-      printf("%6s %5s %6d/%4d %5d/%5d %7d/%3d %s\n", node, state, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
+      printf("%6s %6s %6d/%4d %5d/%5d %7d/%3d %s\n", node, state, cpus_alloc, cpus, mem_alloc, mem, gpus_alloc, gpus, users)
     };
     END{
-      printf("%6s %5s %6d/%4d %5d/%5d %7d/%3d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
+      printf("%6s %6s %6d/%4d %5d/%5d %7d/%3d\n", "TOTAL", "", total_cpus_alloc, total_cpus, total_mem_alloc, total_mem, total_gpus_alloc, total_gpus)
     }'
   pending_jobs=$(squeue --partition $1 -t PENDING --noheader)
   if [ ! -z "$pending_jobs" ]; then
